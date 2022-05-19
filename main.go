@@ -11,8 +11,6 @@ import (
 )
 
 func main() {
-	port := helpers.GoDotEnvVariable("PORT")
-
 	database.Connect()
 	app := fiber.New()
 
@@ -22,16 +20,17 @@ func main() {
 	app.Use(cors.New(cors.Config {
 		AllowCredentials: true,
 	}))
+	
+	// ui
+	routes.StaticRoutes(app)
 
 	// routes
 	routes.AuthRoutes(app)
 	routes.HabitRoutes(app)
 
-
-	// returning 404 after wrong route
-	app.Use(func(c *fiber.Ctx) error {
-		return c.Status(fiber.StatusNotFound).SendString("Error 404: not found")
-	})
-
+	port := helpers.GoDotEnvVariable("PORT")
+	if port == "" {
+		port = "3000"
+	}
 	log.Fatal(app.Listen(":"+ port))
 }
